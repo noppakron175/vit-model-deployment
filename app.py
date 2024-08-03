@@ -3,6 +3,20 @@ import torch
 from torchvision import transforms
 from PIL import Image
 from transformers import ViTForImageClassification, ViTConfig
+import os
+import gzip
+import shutil
+
+# Path to the compressed model file
+compressed_model_path = 'model/vit_model.pth.gz'
+model_path = 'model/vit_model.pth'
+
+# Check if the decompressed model already exists
+if not os.path.exists(model_path):
+    # Decompress the model if it doesn't exist
+    with gzip.open(compressed_model_path, 'rb') as f_in:
+        with open(model_path, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
 app = Flask(__name__)
 
@@ -13,7 +27,6 @@ model_config.num_labels = num_classes
 model = ViTForImageClassification(config=model_config)
 
 # Load the state dictionary from your checkpoint
-model_path = 'model/vit_model.pth'
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
 
